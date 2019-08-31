@@ -40,8 +40,14 @@ public class PasswordPolicyConstants {
     public static final String PASSWORD_CHANGE_EVENT_HANDLER_NAME = "passwordExpiry";
 
     public static final String CONNECTOR_CONFIG_FRIENDLY_NAME = "Password Expiry";
-    public static final String CONNECTOR_CONFIG_CATEGORY = "Password Policies";
+    public static final String CONNECTOR_CONFIG_CATEGORY = "Lifetime Password Policies";
     public static final String CONNECTOR_CONFIG_SUB_CATEGORY = "DEFAULT";
+    
+    public static final String CONNECTOR_CONFIG_PASSWORD_MIN_LIFETIME_IN_DAYS = "passwordExpiry.passwordMinLifetimeInDays";
+    public static final String CONNECTOR_CONFIG_PASSWORD_MIN_LIFETIME_IN_DAYS_DISPLAYED_NAME = "Password Min Lifetime In Days";
+    public static final String CONNECTOR_CONFIG_PASSWORD_MIN_LIFETIME_IN_DAYS_DESCRIPTION =
+            "Minimum number of days to be able to change password";
+    public static final int CONNECTOR_CONFIG_PASSWORD_MIN_LIFETIME_IN_DAYS_DEFAULT_VALUE = 1;
 
     public static final String CONNECTOR_CONFIG_PASSWORD_EXPIRY_IN_DAYS = "passwordExpiry.passwordExpiryInDays";
     public static final String CONNECTOR_CONFIG_PASSWORD_EXPIRY_IN_DAYS_DISPLAYED_NAME = "Password Expiry In Days";
@@ -66,6 +72,33 @@ public class PasswordPolicyConstants {
 
     public static final String LOGIN_STANDARD_PAGE = "login.do";
     public static final String PASSWORD_RESET_ENFORCER_PAGE = "pwd-reset.jsp";
+    
+    public enum ErrorMessages {
+
+        ERROR_CODE_PASSWORD_MIN_LIFETIME_VIOLATE("22001", "You can't change again your password so quickly");
+        ;
+
+        private final String code;
+        private final String message;
+
+        ErrorMessages(String code, String message) {
+            this.code = code;
+            this.message = message;
+        }
+
+        public String getCode() {
+            return code;
+        }
+
+        public String getMessage() {
+            return message;
+        }
+
+        @Override
+        public String toString() {
+            return code + " - " + message;
+        }
+    }
 
     private PasswordPolicyConstants() {      // To prevent instantiation
     }

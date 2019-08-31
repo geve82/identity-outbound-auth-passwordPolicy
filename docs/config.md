@@ -16,9 +16,11 @@
 
    ```
    module.name.13=passwordExpiry
-   passwordExpiry.subscription.1=POST_UPDATE_CREDENTIAL
-   passwordExpiry.subscription.2=POST_UPDATE_CREDENTIAL_BY_ADMIN
-   passwordExpiry.subscription.3=POST_ADD_USER
+   passwordExpiry.subscription.1=PRE_UPDATE_CREDENTIAL
+   passwordExpiry.subscription.2=POST_UPDATE_CREDENTIAL
+   passwordExpiry.subscription.3=POST_UPDATE_CREDENTIAL_BY_ADMIN
+   passwordExpiry.subscription.4=POST_ADD_USER
+   passwordExpiry.passwordMinLifetimeInDays=1
    passwordExpiry.passwordExpiryInDays=30
    passwordExpiry.enableDataPublishing=false
    passwordExpiry.priorReminderTimeInDays=0
@@ -37,7 +39,8 @@ Follow the steps given below to configure the number of days after which the pas
 
 1. [Start](https://docs.wso2.com/display/IS540/Running+the+Product) the Identity Server and log in. (If you have not already done so)
 2. In the `Identity` section under the `Main` tab, click `Resident` under `Identity Providers`.
-3. Go to `Password Expiry` under `Password Policies`.
+3. Go to `Lifetime Password Policies` under `Password Policies`.
+4. Change `Password Min Lifetime In Days` according to your requirements.
 4. Change `Password Expiry In Days` according to your requirements.
    
    > By default, the Password Reset Enforcer will expire passwords in 30 days.

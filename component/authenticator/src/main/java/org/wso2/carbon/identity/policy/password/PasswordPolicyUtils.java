@@ -18,8 +18,10 @@
 
 package org.wso2.carbon.identity.policy.password;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.wso2.carbon.identity.base.IdentityException;
 import org.wso2.carbon.identity.event.IdentityEventConfigBuilder;
 import org.wso2.carbon.identity.event.IdentityEventException;
 import org.wso2.carbon.identity.event.bean.ModuleConfiguration;
@@ -37,12 +39,13 @@ public class PasswordPolicyUtils {
     }
 
     /**
-     * Get the property names required by the password expiry policy.
+     * Get the property names required by the password lifetime policy.
      *
-     * @return The password expiry policy
+     * @return The password lifetime policy
      */
     public static String[] getPasswordExpiryPropertyNames() {
         List<String> properties = new ArrayList<>();
+        properties.add(PasswordPolicyConstants.CONNECTOR_CONFIG_PASSWORD_MIN_LIFETIME_IN_DAYS);
         properties.add(PasswordPolicyConstants.CONNECTOR_CONFIG_PASSWORD_EXPIRY_IN_DAYS);
         properties.add(PasswordPolicyConstants.CONNECTOR_CONFIG_ENABLE_EMAIL_NOTIFICATIONS);
         properties.add(PasswordPolicyConstants.CONNECTOR_CONFIG_PRIOR_REMINDER_TIME_IN_DAYS);
@@ -74,5 +77,16 @@ public class PasswordPolicyUtils {
             }
         }
         return propertyValue;
+    }
+    
+    public static IdentityEventException handleEventException(PasswordPolicyConstants.ErrorMessages
+            error, String data) throws IdentityEventException {
+        String errorDescription;
+        if (StringUtils.isNotBlank(data)) {
+            errorDescription = String.format(error.getMessage(), data);
+        } else {
+            errorDescription = error.getMessage();
+        }
+        return IdentityException.error(IdentityEventException.class, error.getCode(), errorDescription);
     }
 }

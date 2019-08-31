@@ -80,6 +80,37 @@ public class PasswordChangeHandlerTest {
         passwordChangeHandler = new PasswordChangeHandler();
         initMocks(this);
     }
+    
+    @Test
+    public void testHandlePreUpdateCredentialByAdminEvent()
+            throws UserStoreException, IdentityApplicationManagementException {
+        mockStatic(IdentityTenantUtil.class);
+        mockStatic(IdentityUtil.class);
+        mockStatic(PasswordPolicyUtils.class);
+
+        when(IdentityTenantUtil.getTenantId(TENANT_DOMAIN)).thenReturn(TENANT_ID);
+        when(IdentityTenantUtil.getRealmService()).thenReturn(realmService);
+        when(realmService.getTenantUserRealm(TENANT_ID)).thenReturn(userRealm);
+        when(userRealm.getUserStoreManager()).thenReturn(userStoreManager);
+
+        RealmConfiguration realmConfig = new RealmConfiguration();
+        realmConfig.getUserStoreProperties().put("DomainName", TENANT_DOMAIN);
+        when(userStoreManager.getRealmConfiguration()).thenReturn(realmConfig);
+
+        when(PasswordPolicyUtils.getIdentityEventProperty(TENANT_DOMAIN,
+                PasswordPolicyConstants.CONNECTOR_CONFIG_ENABLE_EMAIL_NOTIFICATIONS)).thenReturn("true");
+
+        Event event = new Event("PRE_UPDATE_CREDENTIAL");
+        event.getEventProperties().put(IdentityEventConstants.EventProperty.USER_NAME, USERNAME);
+        event.getEventProperties().put(IdentityEventConstants.EventProperty.USER_STORE_MANAGER, userStoreManager);
+        event.getEventProperties().put(IdentityEventConstants.EventProperty.TENANT_DOMAIN, TENANT_DOMAIN);
+
+        try {
+            passwordChangeHandler.handleEvent(event);   // Shouldn't throw exception
+        } catch (IdentityEventException e) {
+            Assert.fail("The authenticator failed the authentication flow");
+        }
+    }
 
     @Test
     public void testHandlePostUpdateCredentialByAdminEvent()
@@ -300,7 +331,11 @@ public class PasswordChangeHandlerTest {
     @Test
     public void testGetPropertyNameMapping() {
         Map<String, String> propertyNameMapping = passwordChangeHandler.getPropertyNameMapping();
-        Assert.assertEquals(propertyNameMapping.size(), 3);
+        Assert.assertEquals(propertyNameMapping.size(), 4);
+        Assert.assertEquals(
+                propertyNameMapping.get(PasswordPolicyConstants.CONNECTOR_CONFIG_PASSWORD_MIN_LIFETIME_IN_DAYS),
+                PasswordPolicyConstants.CONNECTOR_CONFIG_PASSWORD_MIN_LIFETIME_IN_DAYS_DISPLAYED_NAME
+        );
         Assert.assertEquals(
                 propertyNameMapping.get(PasswordPolicyConstants.CONNECTOR_CONFIG_PASSWORD_EXPIRY_IN_DAYS),
                 PasswordPolicyConstants.CONNECTOR_CONFIG_PASSWORD_EXPIRY_IN_DAYS_DISPLAYED_NAME
@@ -318,7 +353,11 @@ public class PasswordChangeHandlerTest {
     @Test
     public void testGetPropertyDescriptionMapping() {
         Map<String, String> propertyDescriptionMapping = passwordChangeHandler.getPropertyDescriptionMapping();
-        Assert.assertEquals(propertyDescriptionMapping.size(), 3);
+        Assert.assertEquals(propertyDescriptionMapping.size(), 4);
+        Assert.assertEquals(
+                propertyDescriptionMapping.get(PasswordPolicyConstants.CONNECTOR_CONFIG_PASSWORD_MIN_LIFETIME_IN_DAYS),
+                PasswordPolicyConstants.CONNECTOR_CONFIG_PASSWORD_MIN_LIFETIME_IN_DAYS_DESCRIPTION
+        );
         Assert.assertEquals(
                 propertyDescriptionMapping.get(PasswordPolicyConstants.CONNECTOR_CONFIG_PASSWORD_EXPIRY_IN_DAYS),
                 PasswordPolicyConstants.CONNECTOR_CONFIG_PASSWORD_EXPIRY_IN_DAYS_DESCRIPTION
@@ -336,16 +375,19 @@ public class PasswordChangeHandlerTest {
     @Test
     public void testGetPropertyNames() {
         String[] propertyNames = passwordChangeHandler.getPropertyNames();
-        Assert.assertEquals(propertyNames.length, 3);
-        Assert.assertEquals(propertyNames[0], PasswordPolicyConstants.CONNECTOR_CONFIG_PASSWORD_EXPIRY_IN_DAYS);
-        Assert.assertEquals(propertyNames[1], PasswordPolicyConstants.CONNECTOR_CONFIG_ENABLE_EMAIL_NOTIFICATIONS);
-        Assert.assertEquals(propertyNames[2], PasswordPolicyConstants.CONNECTOR_CONFIG_PRIOR_REMINDER_TIME_IN_DAYS);
+        Assert.assertEquals(propertyNames.length, 4);
+        Assert.assertEquals(propertyNames[0], PasswordPolicyConstants.CONNECTOR_CONFIG_PASSWORD_MIN_LIFETIME_IN_DAYS);
+        Assert.assertEquals(propertyNames[1], PasswordPolicyConstants.CONNECTOR_CONFIG_PASSWORD_EXPIRY_IN_DAYS);
+        Assert.assertEquals(propertyNames[2], PasswordPolicyConstants.CONNECTOR_CONFIG_ENABLE_EMAIL_NOTIFICATIONS);
+        Assert.assertEquals(propertyNames[3], PasswordPolicyConstants.CONNECTOR_CONFIG_PRIOR_REMINDER_TIME_IN_DAYS);
     }
 
     @Test
     public void testGetDefaultPropertyValues() throws IdentityGovernanceException {
         mockStatic(PasswordPolicyUtils.class);
 
+        when(PasswordPolicyUtils.getIdentityEventProperty(TENANT_DOMAIN,
+                PasswordPolicyConstants.CONNECTOR_CONFIG_PASSWORD_MIN_LIFETIME_IN_DAYS)).thenReturn("1");
         when(PasswordPolicyUtils.getIdentityEventProperty(TENANT_DOMAIN,
                 PasswordPolicyConstants.CONNECTOR_CONFIG_PASSWORD_EXPIRY_IN_DAYS)).thenReturn("30");
         when(PasswordPolicyUtils.getIdentityEventProperty(TENANT_DOMAIN,
@@ -360,7 +402,11 @@ public class PasswordChangeHandlerTest {
         when(moduleConfiguration.getModuleProperties()).thenReturn(moduleProperties);
 
         Properties defaultPropertyValues = passwordChangeHandler.getDefaultPropertyValues(TENANT_DOMAIN);
-        Assert.assertEquals(defaultPropertyValues.size(), 3);
+        Assert.assertEquals(defaultPropertyValues.size(), 4);
+        Assert.assertEquals(
+                defaultPropertyValues.get(PasswordPolicyConstants.CONNECTOR_CONFIG_PASSWORD_MIN_LIFETIME_IN_DAYS),
+                "1"
+        );
         Assert.assertEquals(
                 defaultPropertyValues.get(PasswordPolicyConstants.CONNECTOR_CONFIG_PASSWORD_EXPIRY_IN_DAYS),
                 "30"
